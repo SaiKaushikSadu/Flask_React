@@ -3,10 +3,14 @@ from flask_pymongo import pymongo
 from flask_cors import CORS
 import pandas as pd
 import csv
+from dotenv import load_dotenv
+import os
 
 app=Flask(__name__)
 
-MONGO_URI="mongodb+srv://saikaushiksadu:Kaushik97@cluster0.avfddoc.mongodb.net/"
+load_dotenv()
+
+MONGO_URI=os.getenv("var")
 client = pymongo.MongoClient(MONGO_URI)
 db = client.get_database('flask_react')
 user_collection = pymongo.collection.Collection(db, 'user_collection')
@@ -91,13 +95,13 @@ def upload_data():
         for filed in header:
             row[filed]=each[filed]
         # print(row)
-        db['data'].insert_one(row)
+        db['datas'].insert_one(row)
     return jsonify({'message':'Processed successfully!'})
 
 #Retrieves the data from the original database and then gets the data performs some analysis and then again store them in to new collection.
 @app.route("/process",methods=['POST'])
 def process():
-    data = db['data'].find()
+    data = db['datas'].find()
     my_dataset=pd.DataFrame(data)
     my_dataset['total_population'] = my_dataset['population_male'].astype(int) + my_dataset['population_female'].astype(int)
     my_dataset['population_male'] = my_dataset['population_male'].astype(int) 
